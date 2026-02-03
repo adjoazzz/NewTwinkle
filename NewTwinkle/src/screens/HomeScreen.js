@@ -16,14 +16,23 @@ import * as ImagePicker from 'expo-image-picker';
 
 const { width } = Dimensions.get('window');
 
-export default function HomeScreen({ navigation }) {
+  export default function HomeScreen({ navigation }) {
+  console.log('HomeScreen rendered');
+  // const [pinterestUrl, setPinterestUrl] = useState('');
+  // ... rest of code
+  
   const [pinterestUrl, setPinterestUrl] = useState('');
 
-  const handlePinterestSubmit = () => {
-    if (pinterestUrl.trim()) {
-      navigation.navigate('PinterestInput', { initialUrl: pinterestUrl });
-    }
-  };
+const handlePinterestSubmit = () => {
+  if (pinterestUrl.trim()) {
+    // For now, we'll navigate with the URL
+    // Later you'll fetch images from Pinterest API
+    navigation.navigate('Collection', { 
+      sourceUrl: pinterestUrl,
+      images: [] // Empty for now, will be filled when you add Pinterest scraping
+    });
+  }
+};
 
   const handleFileUpload = async () => {
     // Ask for permission
@@ -40,10 +49,15 @@ export default function HomeScreen({ navigation }) {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      console.log(result.assets); 
-      // Navigate to next screen with selected images
-      // navigation.navigate('Collection', { images: result.assets });
+    if (!result.canceled && result.assets.length > 0) {
+      // Extract URIs from selected images
+      const imageUris = result.assets.map(asset => asset.uri);
+      
+      // Navigate to Collection screen with selected images
+      navigation.navigate('Collection', { 
+        images: imageUris,
+        sourceUrl: 'uploaded'
+      });
     }
   };
 
@@ -160,12 +174,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 30,
     color: '#FFFFFF',
     lineHeight: 38,
     letterSpacing: -0.5,
-    fontFamily: 'Recoleta', // ✅ FONT APPLIED
+    fontFamily: 'Recoleta',
   },
   previewContainer: {
     justifyContent: 'center',
@@ -220,14 +233,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     color: '#000000',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     fontFamily: 'NeueMontreal', // ✅ FONT APPLIED
   },
 });

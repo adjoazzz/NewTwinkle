@@ -1,8 +1,8 @@
 // App.js
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as Font from 'expo-font';
+import { useFonts } from 'expo-font';  // ADD THIS LINE
 import * as SplashScreen from 'expo-splash-screen';
 import HomeScreen from "./src/screens/HomeScreen";
 import PinterestInputScreen from "./src/screens/PinterestInputScreen";
@@ -13,28 +13,19 @@ SplashScreen.preventAutoHideAsync();
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoaded] = useFonts({
+    'Recoleta': require('./assets/fonts/Recoleta-RegularDEMO.otf'),
+    'NeueMontreal': require('./assets/fonts/NeueMontreal-Regular.otf'),
+  });
 
-  useEffect(() => {
-    async function loadFonts() {
-      try {
-        await Font.loadAsync({
-          'Recoleta': require('./assets/fonts/Recoleta-RegularDEMO.otf'),
-          'NeueMontreal': require('./assets/fonts/NeueMontreal-Regular.ttf'),
-          'NeueMontreal-Bold': require('./assets/fonts/NeueMontreal-Bold.ttf'),
-        });
-      } catch (e) {
-        console.warn('Font loading error:', e);
-      } finally {
-        setFontsLoaded(true);
-        await SplashScreen.hideAsync();
-      }
+  React.useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
     }
-    loadFonts();
-  }, []);
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null; // Show nothing until fonts are loaded
+    return null;
   }
 
   return (
