@@ -10,39 +10,38 @@ import {
   Alert,
   Dimensions,
   ImageBackground,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 
 const { width } = Dimensions.get('window');
 
-  export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation }) {
   console.log('HomeScreen rendered');
-  // const [pinterestUrl, setPinterestUrl] = useState('');
-  // ... rest of code
   
   const [pinterestUrl, setPinterestUrl] = useState('');
 
-const handlePinterestSubmit = () => {
-  if (pinterestUrl.trim()) {
-    // For now, we'll navigate with the URL
-    // Later you'll fetch images from Pinterest API
-    navigation.navigate('Collection', { 
-      sourceUrl: pinterestUrl,
-      images: [] // Empty for now, will be filled when you add Pinterest scraping
-    });
-  }
-};
+  const handlePinterestSubmit = () => {
+    if (pinterestUrl.trim()) {
+      navigation.navigate('Collection', { 
+        sourceUrl: pinterestUrl,
+        images: []
+      });
+    }
+  };
 
   const handleFileUpload = async () => {
-    // Ask for permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Required', 'Permission to access photos is required!');
       return;
     }
 
-    // Open gallery
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
@@ -50,10 +49,8 @@ const handlePinterestSubmit = () => {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      // Extract URIs from selected images
       const imageUris = result.assets.map(asset => asset.uri);
       
-      // Navigate to Collection screen with selected images
       navigation.navigate('Collection', { 
         images: imageUris,
         sourceUrl: 'uploaded'
@@ -65,28 +62,30 @@ const handlePinterestSubmit = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
-  
       <ImageBackground
         source={require('../../assets/images/bg.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
-        {/* Optional: Add gradient overlay on top of image */}
-        {/* <LinearGradient
-          colors={['rgba(63, 14, 154, 0.6)', 'rgba(159, 190, 216, 0.6)', 'rgba(244, 228, 193, 0.6)', 'rgba(232, 196, 160, 0.6)']}
-          style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        > */}
-          <SafeAreaView style={styles.safeArea}>
-            <View style={styles.content}>
-              {/* Header */}
-              <View style={styles.header}>
-                <Text style={styles.emoji}>🌸</Text>
-                <Text style={styles.title}>
-                  Let's turn your inspiration{'\n'}into wallpapers
-                </Text>
-              </View>
+        <SafeAreaView style={styles.safeArea}>
+          <KeyboardAvoidingView 
+            style={styles.keyboardView}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={0}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <ScrollView 
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                {/* Header */}
+                <View style={styles.header}>
+                  <Text style={styles.emoji}>🌸</Text>
+                  <Text style={styles.title}>
+                    Let's turn your inspiration{'\n'}into wallpapers
+                  </Text>
+                </View>
 
                 {/* Sample Cards Preview */}
                 <View style={styles.previewContainer}>
@@ -97,48 +96,50 @@ const handlePinterestSubmit = () => {
                   />
                 </View>
 
-              <View style={styles.spacer} />
+                <View style={styles.spacer} />
 
-              {/* Bottom Section - Input Areas */}
-              <View style={styles.bottomSection}>
-                {/* Pinterest Board Section */}
-                <View style={styles.inputSection}>
-                  <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Use a Pinterest board</Text>
-                    <Text style={styles.sectionSubtitle}>
-                      Turn your Pinterest vision board into your daily motivation
-                    </Text>
+                {/* Bottom Section - Input Areas */}
+                <View style={styles.bottomSection}>
+                  {/* Pinterest Board Section */}
+                  <View style={styles.inputSection}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>Use a Pinterest board</Text>
+                      <Text style={styles.sectionSubtitle}>
+                        Turn your Pinterest vision board into your daily motivation
+                      </Text>
+                    </View>
+                    
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Your board link here"
+                      placeholderTextColor="rgba(0, 0, 0, 0.4)"
+                      value={pinterestUrl}
+                      onChangeText={setPinterestUrl}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="url"
+                      returnKeyType="go"
+                      onSubmitEditing={handlePinterestSubmit}
+                    />
                   </View>
-                  
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Your board link here"
-                    placeholderTextColor="rgba(0, 0, 0, 0.4)"
-                    value={pinterestUrl}
-                    onChangeText={setPinterestUrl}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    keyboardType="url"
-                    returnKeyType="go"
-                    onSubmitEditing={handlePinterestSubmit}
-                  />
+
+                  <TouchableOpacity
+                    style={styles.uploadSection}
+                    onPress={handleFileUpload}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.uploadContent}>
+                      <Text style={styles.sectionTitle}>Upload images</Text>
+                      <Text style={styles.sectionSubtitle}>
+                        Choose photos, art, or screenshots you want to use as wallpapers
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity
-                  style={styles.uploadSection}
-                  onPress={handleFileUpload}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.uploadContent}>
-                    <Text style={styles.sectionTitle}>Upload images</Text>
-                    <Text style={styles.sectionSubtitle}>
-                      Choose photos, art, or screenshots you want to use as wallpapers
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </SafeAreaView>
+              </ScrollView>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
       </ImageBackground>
     </View>
   );
@@ -153,14 +154,14 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  gradient: {
-    flex: 1,
-  },
   safeArea: {
     flex: 1,
   },
-  content: {
+  keyboardView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 30,
@@ -188,10 +189,11 @@ const styles = StyleSheet.create({
   },
   previewImage: {
     width: '100%',
-    height: width * 0.5, // Adjust this height as needed
+    height: width * 0.5,
   },
   spacer: {
     flex: 1,
+    minHeight: 20,
   },
   bottomSection: {
     gap: 20,
@@ -218,13 +220,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#FFFFFF',
-    fontFamily: 'NeueMontreal', // ✅ FONT APPLIED
+    fontFamily: 'NeueMontreal',
   },
   sectionSubtitle: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.95)',
     lineHeight: 20,
-    fontFamily: 'NeueMontreal', // ✅ FONT APPLIED
+    fontFamily: 'NeueMontreal',
   },
   textInput: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -233,6 +235,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     color: '#000000',
-    fontFamily: 'NeueMontreal', // ✅ FONT APPLIED
+    fontFamily: 'NeueMontreal',
   },
 });

@@ -19,69 +19,80 @@ const imageSize = (width - 60) / 3; // 3 columns with padding
 export default function CollectionScreen({ route, navigation }) {
   const { images = [], sourceUrl = '' } = route.params || {};
 
+  // Generate random rotation for each image
+  const getRandomRotation = (index) => {
+    // Use index as seed for consistent rotation per image
+    const rotations = [-8, -5, -3, 3, 5, 8];
+    return rotations[index % rotations.length];
+  };
+
   const renderImage = ({ item, index }) => (
     <View style={styles.imageContainer}>
       <Image
         source={{ uri: item }}
-        style={styles.image}
+        style={[
+          styles.image,
+          { transform: [{ rotate: `${getRandomRotation(index)}deg` }] }
+        ]}
         resizeMode="cover"
       />
     </View>
   );
 
-return (
-  <View style={styles.container}>
-    <StatusBar barStyle="light-content" />
-    
-    <ImageBackground
-        source={require('../../assets/images/bg.png')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity 
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
-              <Text style={styles.backIcon}>←</Text>
-              <Text style={styles.backText}>Back</Text>
-            </TouchableOpacity>
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      <ImageBackground
+          source={require('../../assets/images/bg.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.content}>
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity 
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+              >
+                <Text style={styles.backIcon}>←</Text>
+                <Text style={styles.backText}>Back</Text>
+              </TouchableOpacity>
 
-            <Text style={styles.logo}>✨</Text>
-            <Text style={styles.title}>Your collection is ready!</Text>
-            <Text style={styles.subtitle}>
-              {images.length} wallpaper{images.length !== 1 ? 's' : ''} ready
-            </Text>
+              <Text style={styles.logo}>✨</Text>
+              <Text style={styles.title}>Your collection is ready!</Text>
+              <Text style={styles.subtitle}>
+                {images.length} wallpaper{images.length !== 1 ? 's' : ''} ready
+              </Text>
+            </View>
+
+            {/* Image Grid */}
+            <FlatList
+              data={images}
+              renderItem={renderImage}
+              keyExtractor={(item, index) => index.toString()}
+              numColumns={3}
+              contentContainerStyle={styles.grid}
+              showsVerticalScrollIndicator={false}
+            />
+
+            {/* Bottom Action */}
+            <View style={styles.bottomSection}>
+              // Update the Next button in CollectionScreen.js
+              <TouchableOpacity
+                style={styles.nextButton}
+                onPress={() => navigation.navigate('Customize', { images, sourceUrl })}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.nextButtonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          {/* Image Grid */}
-          <FlatList
-            data={images}
-            renderItem={renderImage}
-            keyExtractor={(item, index) => index.toString()}
-            numColumns={3}
-            contentContainerStyle={styles.grid}
-            showsVerticalScrollIndicator={false}
-          />
-
-          {/* Bottom Action */}
-          <View style={styles.bottomSection}>
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={() => alert('Customize screen coming soon!')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.nextButtonText}>Next</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
-    </ImageBackground>
-  </View>
-);
+        </SafeAreaView>
+      </ImageBackground>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
